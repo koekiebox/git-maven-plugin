@@ -6,7 +6,7 @@
   <groupId>com.koekiebox.git-maven-plugin</groupId>
   <artifactId>git-maven-plugin-root</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0</version>
+  <version>1.0-SNAPSHOT</version>
   <name>Git Maven Plugin Root</name>
   <description>Parent pom providing default setups for all application and admin servers modules</description>
 
@@ -25,9 +25,6 @@
     <!-- [WARNING] Using platform encoding (UTF-8 actually) to copy filtered
       resources, i.e. build is platform dependent! -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!-- JBoss dependency versions -->
-    <version.jboss.maven.plugin>7.3.Final</version.jboss.maven.plugin>
 
     <!-- Define the version of JBoss' Java EE 6 APIs and Tools we want to import. -->
     <version.jboss.bom>1.0.5.CR2</version.jboss.bom>
@@ -54,190 +51,10 @@
 
   <dependencyManagement>
     <dependencies>
-      <!-- JBoss distributes a complete set of Java EE 6 APIs including a Bill
-        of Materials (BOM). A BOM specifies the versions of a "stack" (or a collection)
-        of artifacts. We use this here so that we always get the correct versions
-        of artifacts. Here we use the jboss-javaee-6.0-with-tools stack (you can
-        read this as the JBoss stack of the Java EE 6 APIs, with some extras tools
-        for your project, such as Arquillian for testing) and the jboss-javaee-6.0-with-hibernate
-        stack you can read this as the JBoss stack of the Java EE 6 APIs, with extras
-        from the Hibernate family of projects) -->
       <dependency>
-        <groupId>org.jboss.bom</groupId>
-        <artifactId>jboss-javaee-6.0-with-tools</artifactId>
-        <version>${version.jboss.bom}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.bom</groupId>
-        <artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
-        <version>${version.jboss.bom}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jboss.bom</groupId>
-        <artifactId>jboss-javaee-6.0-with-resteasy</artifactId>
-        <version>${version.jboss.bom}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss.bom</groupId>
-        <artifactId>jboss-javaee-6.0-with-infinispan</artifactId>
-        <version>${version.jboss.bom}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <!--Dark Server Dependencies-->
-      <dependency>
-        <groupId>com.thumbzup.dark-server</groupId>
-        <artifactId>dark-server</artifactId>
-        <version>1.0.0</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--Netty 4 for Lightserver Communication.-->
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-all</artifactId>
-        <version>4.0.8.Final</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!-- J2EE 6 -->
-      <dependency>
-        <groupId>javax</groupId>
-        <artifactId>javaee-api</artifactId>
-        <version>6.0</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--MySQL-->
-      <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.25</version>
-        <scope>compile</scope>
-      </dependency>
-
-      <!--Flyway for Startup Scripts-->
-      <dependency>
-        <groupId>com.googlecode.flyway</groupId>
-        <artifactId>flyway-core</artifactId>
-        <version>2.2.1</version>
-        <scope>provided</scope>
-        <exclusions>
-          <exclusion>
-            <artifactId>commons-logging</artifactId>
-            <groupId>commons-logging</groupId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <!--Commons IO-->
-      <dependency>
-        <groupId>commons-fileupload</groupId>
-        <artifactId>commons-fileupload</artifactId>
-        <version>1.2.1</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.4</version>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>1.4</version>
-      </dependency>
-
-      <!--JSF-->
-      <dependency>
-        <groupId>javax.faces</groupId>
-        <artifactId>javax.faces-api</artifactId>
-        <version>2.1</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--JSP Prime Faces Dependencies-->
-      <dependency>
-        <groupId>org.primefaces</groupId>
-        <artifactId>primefaces</artifactId>
-        <version>3.5</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--TODO dependency>
-        <groupId>org.primefaces.themes</groupId>
-        <artifactId>blitzer</artifactId>
-        <version>1.0.8</version>
-        <scope>provided</scope>
-      </dependency-->
-
-      <dependency>
-        <groupId>org.primefaces.themes</groupId>
-        <artifactId>dark-hive</artifactId>
-        <version>1.0.10</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.omnifaces</groupId>
-        <artifactId>omnifaces</artifactId>
-        <version>1.5</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--The Logger-->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.5</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--JSON Library API-->
-      <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>20090211</version>
-        <scope>provided</scope>
-      </dependency>
-      
-      <!--Google Guava-->
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>14.0.1</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <!--Bouncy Castle for PGP and PKIX-->
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <version>1.49</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcpkix-jdk15on</artifactId>
-        <version>1.49</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcpg-jdk15on</artifactId>
-        <version>1.49</version>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>2.0</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>

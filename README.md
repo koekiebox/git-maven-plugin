@@ -3,7 +3,7 @@ Git Maven Plugin
 
 Maven Git plugin to perform basic Git functions from within Maven.
 
-<<<Usage>>>
+*** Usage ***
 
 1. Add Plug-in repository.
 
