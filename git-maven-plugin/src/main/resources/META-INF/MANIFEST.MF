@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Name: Git Maven Plugin
+Created-By: Apache Maven
+Built-By: jbruwer (koekiebox)
