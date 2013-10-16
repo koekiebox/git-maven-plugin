@@ -79,19 +79,14 @@ public class CommandUtil {
 			throw new MojoExecutionException("Unable to execute command. No commands provided.");
 		}
 
-		logParam.info("Cool, in the bag...");
-
 		List<String> returnedLines = new ArrayList<>();
 
 		try
 		{
-			logParam.info("About to execute...");
 			Process process = Runtime.getRuntime().exec(commandParams);
-			logParam.info("Got Process");
 
 			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-			logParam.info("Got Reader");
 			String readLine = null;
 			while((readLine = reader.readLine()) != null)
 			{
@@ -106,12 +101,11 @@ public class CommandUtil {
 
 				while((readLine = errorReader.readLine()) != null)
 				{
-					logParam.info("ERROR_LINE["+readLine+"]");
+					logParam.error("ERROR_LINE["+readLine+"]");
 					returnedLines.add(readLine);
 				}
 			}
 
-			logParam.info("Time to wait");
 			int exitValue = -1000;
 			try {
 				exitValue = process.waitFor();
@@ -124,8 +118,6 @@ public class CommandUtil {
 
 				throw new MojoExecutionException("Unable to wait for command ["+commandString+"] to exit. "+e.getMessage(),e);
 			}
-
-			logParam.info("Returning Result: "+exitValue);
 
 			String[] rtnArr = {};
 			return new CommandResult(exitValue,returnedLines.toArray(rtnArr));

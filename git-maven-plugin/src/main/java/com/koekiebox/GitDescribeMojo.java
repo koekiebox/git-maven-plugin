@@ -37,15 +37,21 @@ public class GitDescribeMojo extends AbstractMojo{
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		Properties properties = this.mavenProject.getProperties();
 
+		this.getLog().info("Executing '"+this.mavenProject.getName()+
+															 "' Version: "+this.mavenProject.getVersion()+ " with 'git describe' support.");
+
+
+		String propertyVal = this.getGitDescribeValue();
+
 		if(this.systemPropertyNameForGitDescribe == null ||
 						this.systemPropertyNameForGitDescribe.trim().isEmpty())
 		{
-			properties.setProperty(DEFAULT_GIT_DESCRIBE,this.getGitDescribeValue());
+			this.systemPropertyNameForGitDescribe = DEFAULT_GIT_DESCRIBE;
 		}
-		else
-		{
-			properties.setProperty(this.systemPropertyNameForGitDescribe,this.getGitDescribeValue());
-		}
+
+		properties.setProperty(this.systemPropertyNameForGitDescribe,propertyVal);
+
+		this.getLog().info("["+this.systemPropertyNameForGitDescribe+"]: "+propertyVal);
 	}
 
 	/**
@@ -73,7 +79,7 @@ public class GitDescribeMojo extends AbstractMojo{
 			}
 
 			return ("Not expected response code ["+commandResult.getExitCode()
-																							 +"]. 'git describe' failed. Tag your repository. "+specificError);
+																							 +"]. 'git describe' failed. Tag your repository!!! "+specificError);
 		}
 
 		this.getLog().info("Execute Result: " +commandResult.getExitCode() + commandResult.getResultLines()[0]);
