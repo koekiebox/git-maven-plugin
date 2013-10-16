@@ -10,39 +10,12 @@
   <name>Git Maven Plugin Root</name>
   <description>Parent pom providing default setups for all application and admin servers modules</description>
 
-  <repositories>
-    <repository>
-      <id>prime-repo</id>
-      <name>PrimeFaces Maven Repository</name>
-      <url>http://repository.primefaces.org</url>
-      <layout>default</layout>
-    </repository>
-  </repositories>
-
   <properties>
-    <!-- Explicitly declaring the source encoding eliminates the following
-			message: -->
-    <!-- [WARNING] Using platform encoding (UTF-8 actually) to copy filtered
-      resources, i.e. build is platform dependent! -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!-- Define the version of JBoss' Java EE 6 APIs and Tools we want to import. -->
-    <version.jboss.bom>1.0.5.CR2</version.jboss.bom>
-    <!-- Alternatively, comment out the above line, and un-comment the line
-      below to use version 1.0.2.Final-redhat-1 which is a release certified to
-      work with JBoss EAP 6. It requires you have access to the JBoss EAP 6 maven
-      repository. -->
-    <!-- <version.jboss.bom>1.0.2.Final-redhat-1</version.jboss.bom>> -->
-    <!-- other plugin versions -->
-    <version.compiler.plugin>2.3.2</version.compiler.plugin>
-    <version.surefire.plugin>2.4.3</version.surefire.plugin>
-    <version.war.plugin>2.1.1</version.war.plugin>
 
     <!-- maven-compiler-plugin -->
     <maven.compiler.target>1.7</maven.compiler.target>
     <maven.compiler.source>1.7</maven.compiler.source>
-
-    <!-- override the jboss versions -->
   </properties>
 
   <modules>
@@ -64,8 +37,17 @@
         <groupId>org.apache.maven.plugin-tools</groupId>
         <artifactId>maven-plugin-annotations</artifactId>
         <version>3.2</version>
-        <!-- annotations are not needed for plugin execution so you can remove this dependency
-             for execution with using provided scope -->
+        <!--
+        annotations are not needed for plugin execution so you can remove this dependency
+             for execution with using provided scope.
+             -->
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-project</artifactId>
+        <version>2.0.6</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
