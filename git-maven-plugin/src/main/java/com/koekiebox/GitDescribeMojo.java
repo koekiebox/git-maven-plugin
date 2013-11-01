@@ -128,28 +128,16 @@ public class GitDescribeMojo extends AbstractMojo{
 		String fullPath = null;
 		try
 		{
-			this.getLog().info("Reading existing content...");
-
 			finalSource = FileUtils.readFileToString(toReadParam);
 
-			this.getLog().info("Done...Replacing String...");
-
 			fullPath = toReadParam.getAbsolutePath();
-
-			this.getLog().info("0. fullPath: "+fullPath+" | "+constantToChange);
 
 			//public static final String VERSION = "";
 			int indexOfConstantVarDecl = finalSource.lastIndexOf(this.constantToChange);
 
-			this.getLog().info("1. indexOfConstantVarDecl: "+indexOfConstantVarDecl);
-
 			String prefix = finalSource.substring(0,indexOfConstantVarDecl);
 
-			this.getLog().info("2. prefix:\n "+prefix);
-
 			String poster = finalSource.substring(indexOfConstantVarDecl + this.constantToChange.length());
-			this.getLog().info("2.2. poster:\n "+poster);
-
 			int indexOfDblQuote = poster.indexOf('\"');
 			String postfixPartOne = poster.substring(0,indexOfDblQuote+1);
 
@@ -157,8 +145,6 @@ public class GitDescribeMojo extends AbstractMojo{
 
 			String postfixPartTwo = poster.substring(indexOfSecondDblQuote);
 
-			this.getLog().info("6. postfixPartOne:\n "+postfixPartOne);
-			this.getLog().info("7. postfixPartTwo:\n "+postfixPartTwo);
 
 			StringBuilder stringBuilder = new StringBuilder();
 
