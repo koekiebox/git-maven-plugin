@@ -6,7 +6,7 @@
 
   <parent>
     <artifactId>git-maven-plugin-root</artifactId>
-    <groupId>com.koekiebox.git-maven-plugin</groupId>
+    <groupId>com.koekiebox</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
