@@ -7,11 +7,11 @@
   <parent>
     <artifactId>git-maven-plugin-root</artifactId>
     <groupId>com.koekiebox</groupId>
-    <version>1.0</version>
+    <version>1.1</version>
   </parent>
 
   <artifactId>git-maven-plugin</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <packaging>maven-plugin</packaging>
   <name>Git Maven Plugin</name>
 
@@ -46,8 +46,25 @@
         <artifactId>maven-plugin-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+          <!--skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound-->
         </configuration>
+        <executions>
+
+          <execution>
+            <id>default-descriptor</id>
+            <goals>
+              <goal>descriptor</goal>
+            </goals>
+            <phase>process-classes</phase>
+          </execution>
+          <execution>
+            <id>help-descriptor</id>
+            <goals>
+              <goal>helpmojo</goal>
+            </goals>
+            <phase>process-classes</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

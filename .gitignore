@@ -1,3 +1,7 @@
+#Maven Target Folders#
+
+target/
+
 *.class
 
 # Package Files #
