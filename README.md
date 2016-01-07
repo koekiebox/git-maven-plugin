@@ -70,4 +70,5 @@ Maven Git plugin to perform basic Git functions from within Maven.
 > Attributes attr = manifest.getMainAttributes();
 > String value = attr.getValue("git.describe");
 
+5. Release ran with `mvn clean package`.
 
