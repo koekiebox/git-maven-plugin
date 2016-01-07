@@ -18,6 +18,22 @@
     <maven.compiler.source>1.7</maven.compiler.source>
   </properties>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://github.com/koekiebox/git-maven-plugin/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Jason Bruwer</name>
+      <email>jason@koekiebox.com</email>
+      <organization>Koekiebox</organization>
+    </developer>
+  </developers>
+
   <modules>
     <module>git-maven-plugin</module>
   </modules>

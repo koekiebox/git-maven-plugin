@@ -15,12 +15,24 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
- * User: jasonbruwer Date: 10/16/13 Time: 12:11 AM
+ * The GitDescribe Maven plugin entry point.
+ *
+ * <table> <caption>Makes use of the following properties.</caption> <tr>
+ * <th>Property</th> <th>Description</th> <th>Default Value</th> </tr>
+ *
+ * <tr> <td>git-describe-prop-name</td> <td></td> <td>git.describe</td> </tr>
+ * <tr> <td>makeUseOfJavaFile</td> <td></td> <td>false</td> </tr> <tr>
+ * <td>classPathToJavaFile</td> <td></td> <td>No</td> </tr> <tr>
+ * <td>constantToChange</td> <td></td> <td>No</td> </tr> </table>
+ *
+ * @author jasonbruwer
+ * @since v1.0
  */
-@Mojo(name = "git_describe",defaultPhase = LifecyclePhase.INITIALIZE)
+@Mojo(name = "git_describe", defaultPhase = LifecyclePhase.INITIALIZE)
 public class GitDescribeMojo extends AbstractMojo {
 
     private static final String DEFAULT_GIT_DESCRIBE = "git.describe";
+    private static final String PREFIX = "src/main/java/";
 
     @Parameter(property = "git-describe-prop-name", defaultValue = DEFAULT_GIT_DESCRIBE)
     private String systemPropertyNameForGitDescribe;
@@ -34,222 +46,244 @@ public class GitDescribeMojo extends AbstractMojo {
     @Parameter(property = "constantToChange", defaultValue = "false")
     private String constantToChange;
 
-    /** @parameter default-value="${project}" */
+    /**
+     * @parameter default-value="${project}"
+     */
     @Component
     private MavenProject mavenProject;
 
+	private static final String SOURCE = "" + "package {{PACKAGE}};\n\n" + "" + "public class {{CLASS_NAME}} {\n\n" + ""
+			+ "public static final String {{GIT_DESCRIBE_CONSTANT_NAME}} = \"\";\n\n" + "" + "}";
+
+	/**
+	 * Contains the Tokens used for the values to be replaced in the Java source
+	 * files.
+	 */
+	private static final class Token {
+		private static final String CLASS_NAME = "{{CLASS_NAME}}";
+		private static final String PACKAGE = "{{PACKAGE}}";
+		private static final String GIT_DESCRIBE_CONSTANT_NAME = "{{GIT_DESCRIBE_CONSTANT_NAME}}";
+	}
+
+	/**
+	 * Default constructor.
+	 */
+	public GitDescribeMojo() {
+		super();
+	}
+
     /**
-     * 
-     * @throws MojoExecutionException
-     * @throws MojoFailureException
+     * Performs the actual plugin execution.
+     *
+     * The typical command will be {@code git describe}.
+     *
+     * @throws MojoExecutionException An exception occurring during the
+     *             execution of a plugin.
+     * @throws MojoFailureException An exception occurring during the execution
+     *             of a plugin (such as a compilation failure).
      */
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-	Properties properties = this.mavenProject.getProperties();
+        Properties properties = this.mavenProject.getProperties();
 
-	this.getLog().info("Executing '" + this.mavenProject.getName() + "' Version: " + this.mavenProject.getVersion() + " with 'git describe' support.");
+        this.getLog().info("Executing '" + this.mavenProject.getName()
+				+ "' Version: " + this.mavenProject.getVersion() +
+				" with 'git describe' support.");
 
-			File pomFileExecuted = this.mavenProject.getFile();
-			File directoryOfPomFile = pomFileExecuted.getParentFile();
+        File pomFileExecuted = this.mavenProject.getFile();
+        File directoryOfPomFile = pomFileExecuted.getParentFile();
 
-	// Make use of the Java File...
-	if (this.makeUseOfJavaFile) {
-	    // pathOfTheJavaFile
-	    if (this.classPathToJavaFile == null || this.classPathToJavaFile.isEmpty()) {
-		this.getLog().error("When 'makeUseOfJavaFile' the property 'classPathToJavaFile' also needs to be supplied.");
-		return;
-	    }
+        // Make use of the Java File...
+        if (this.makeUseOfJavaFile) {
+            // pathOfTheJavaFile
+            if (this.classPathToJavaFile == null || this.classPathToJavaFile.isEmpty()) {
+                this.getLog().error("When 'makeUseOfJavaFile' the property 'classPathToJavaFile' also needs to be supplied.");
+                return;
+            }
 
-	    // constantToChange
-	    if (this.constantToChange == null || this.constantToChange.isEmpty()) {
-		this.getLog().error("When 'makeUseOfJavaFile' the property 'constantToChange' needs to be supplied also.");
-		return;
-	    }
+            // constantToChange
+            if (this.constantToChange == null || this.constantToChange.isEmpty()) {
+                this.getLog().error("When 'makeUseOfJavaFile' the property 'constantToChange' needs to be supplied also.");
+                return;
+            }
 
-	    String actualPath = this.getActualPathToJavaFile();
-		File actualPathFile = new File(actualPath);
+            String actualPath = this.getActualPathToJavaFile();
+            File actualPathFile = new File(actualPath);
 
-	    if (!actualPathFile.exists()) {
-		this.getLog().info("No GitDescribe file at '" + new File(actualPath).getAbsolutePath() + "'. Creating one.");
+            if (!actualPathFile.exists()) {
+                this.getLog().info("No GitDescribe file at '" + new File(actualPath).getAbsolutePath() + "'. Creating one.");
 
+                try {
+                    this.createDefaultGitDescribe(new File(actualPath));
+                } catch (IOException ioExcept) {
+                    this.getLog().error("Unable to create new Git Describe java file from scratch: " + ioExcept.getMessage() + ".", ioExcept);
+                }
+            } else {
+                this.getLog().info("File '" + actualPathFile.getAbsolutePath() + "' exists. No need to create.");
+            }
+
+            this.getLog().info("Making use of Java File at '" + actualPath + "' for constant '" + this.constantToChange + "'.");
+
+            //
+            if (actualPathFile.exists()) {
+                try {
+                    String propertyVal = this.getGitDescribeValue();
+                    this.getLog().info("Starting to edit Java File...");
+                    this.editJavaFile(actualPathFile, propertyVal);
+                }
+                //
+                catch (IOException ioExcept) {
+                    this.getLog().error("Unable to add Git Describe: " + ioExcept.getMessage() + ".", ioExcept);
+                }
+            }
+            //
+            else {
+                this.getLog().info("No Java File at location '" + actualPathFile.getAbsolutePath() + "' exists to edit.");
+            }
+        }
+		//Making use of setting Maven property.
+        else {
+            this.getLog().info("Making use of setting Maven property.");
+            String propertyVal = this.getGitDescribeValue();
+
+            if (this.systemPropertyNameForGitDescribe == null || this.systemPropertyNameForGitDescribe.trim().isEmpty()) {
+                this.systemPropertyNameForGitDescribe = DEFAULT_GIT_DESCRIBE;
+            }
+
+            properties.setProperty(this.systemPropertyNameForGitDescribe, propertyVal);
+
+            this.getLog().info("[" + this.systemPropertyNameForGitDescribe + "]: " + propertyVal);
+        }
+    }
+
+	/**
+	 * Modifies the {@code toReadParam} file to change {@code constantToChange} to
+	 * {@code gitDescribeValueParam}.
+	 *
+	 * @param toReadParam The file to read and change.
+	 * @param gitDescribeValueParam The outcome of the {@code git describe} command.
+	 * @throws IOException If any File IO Problems occur.
+	 */
+	private void editJavaFile(File toReadParam, String gitDescribeValueParam) throws IOException {
+		String finalSource = null;
+		String fullPath = null;
 		try {
-		    this.createDefaultGitDescribe(new File(actualPath));
-		} catch (IOException ioExcept) {
-		    this.getLog().error("Unable to create new Git Describe java file from scratch: " + ioExcept.getMessage() + ".", ioExcept);
-		}
-	    }
-		else
-			{
-				this.getLog().info("File '"+actualPathFile.getAbsolutePath()+"' exists. No need to create.");
+			this.getLog().info("Existing Value: \n\n" + gitDescribeValueParam);
+
+			finalSource = FileUtils.readFileToString(toReadParam);
+
+			fullPath = toReadParam.getAbsolutePath();
+
+			// public static final String VERSION = "";
+			int indexOfConstantVarDecl = finalSource.lastIndexOf(this.constantToChange);
+
+			String prefix = finalSource.substring(0, indexOfConstantVarDecl);
+
+			String poster = finalSource.substring(indexOfConstantVarDecl + this.constantToChange.length());
+			int indexOfDblQuote = poster.indexOf('\"');
+			String postfixPartOne = poster.substring(0, indexOfDblQuote + 1);
+
+			int indexOfSecondDblQuote = poster.indexOf('\"', indexOfDblQuote + 1);
+
+			String postfixPartTwo = poster.substring(indexOfSecondDblQuote);
+
+			StringBuilder stringBuilder = new StringBuilder();
+
+			stringBuilder.append(prefix);
+			stringBuilder.append(this.constantToChange);
+			stringBuilder.append(postfixPartOne);
+			stringBuilder.append(gitDescribeValueParam);
+			stringBuilder.append(postfixPartTwo);
+
+			this.getLog().info("\n\n\n\n----------\n" + stringBuilder.toString() + "\n---------\n\n\n\n\n\n");
+
+			toReadParam.delete();
+
+			finalSource = stringBuilder.toString();
+		} finally {
+			if (!new File(fullPath).exists() && (finalSource != null && !finalSource.isEmpty())) {
+				FileUtils.writeStringToFile(new File(fullPath), finalSource);
 			}
-
-	    this.getLog().info("Making use of Java File at '" + actualPath + "' for constant '" + this.constantToChange + "'.");
-
-		//
-	    if (actualPathFile.exists()) {
-		try {
-		    String propertyVal = this.getGitDescribeValue();
-		    this.getLog().info("Starting to edit Java File...");
-		    this.editJavaFile(actualPathFile, propertyVal);
 		}
-		//
-		catch (IOException ioExcept) {
-		    this.getLog().error("Unable to add Git Describe: " + ioExcept.getMessage() + ".", ioExcept);
-		}
-	    }
-			//
-			else {
-		this.getLog().info("No Java File at location '" + actualPathFile.getAbsolutePath() + "' exists to edit.");
-	    }
-	} else {
-	    this.getLog().info("Making use of setting Maven property.");
-	    String propertyVal = this.getGitDescribeValue();
-
-	    if (this.systemPropertyNameForGitDescribe == null || this.systemPropertyNameForGitDescribe.trim().isEmpty()) {
-		this.systemPropertyNameForGitDescribe = DEFAULT_GIT_DESCRIBE;
-	    }
-
-	    properties.setProperty(this.systemPropertyNameForGitDescribe, propertyVal);
-
-	    this.getLog().info("[" + this.systemPropertyNameForGitDescribe + "]: " + propertyVal);
 	}
-    }
 
-    /**
-     * 
-     * @param toReadParam
-     * @throws IOException
-     */
-    private void editJavaFile(File toReadParam, String gitDescribeValueParam) throws IOException {
-	String finalSource = null;
-	String fullPath = null;
-	try {
-		this.getLog().info("Existing Value: \n\n"+
-															 gitDescribeValueParam);
-
-	    finalSource = FileUtils.readFileToString(toReadParam);
-
-	    fullPath = toReadParam.getAbsolutePath();
-
-	    // public static final String VERSION = "";
-	    int indexOfConstantVarDecl = finalSource.lastIndexOf(this.constantToChange);
-
-	    String prefix = finalSource.substring(0, indexOfConstantVarDecl);
-
-	    String poster = finalSource.substring(indexOfConstantVarDecl + this.constantToChange.length());
-	    int indexOfDblQuote = poster.indexOf('\"');
-	    String postfixPartOne = poster.substring(0, indexOfDblQuote + 1);
-
-	    int indexOfSecondDblQuote = poster.indexOf('\"', indexOfDblQuote + 1);
-
-	    String postfixPartTwo = poster.substring(indexOfSecondDblQuote);
-
-	    StringBuilder stringBuilder = new StringBuilder();
-
-	    stringBuilder.append(prefix);
-	    stringBuilder.append(this.constantToChange);
-	    stringBuilder.append(postfixPartOne);
-	    stringBuilder.append(gitDescribeValueParam);
-	    stringBuilder.append(postfixPartTwo);
-
-	    this.getLog().info("\n\n\n\n----------\n" + stringBuilder.toString() + "\n---------\n\n\n\n\n\n");
-
-	    toReadParam.delete();
-
-	    finalSource = stringBuilder.toString();
-	} finally {
-	    if (!new File(fullPath).exists() && (finalSource != null && !finalSource.isEmpty())) {
-		FileUtils.writeStringToFile(new File(fullPath), finalSource);
-	    }
-	}
-    }
-
-    private static final String PREFIX = "src/main/java/";
-
-    /**
-     * 
-     * @return
+	/**
+	 * Constructs the path to the Java source file to change based
+	 * on the Maven project location.
+	 *
+	 * @return Path to the Java file where the variable will be replaced.
      */
     private String getActualPathToJavaFile() {
-	if (this.classPathToJavaFile == null) {
-	    return null;
-	}
+        if (this.classPathToJavaFile == null) {
+            return null;
+        }
 
-	String replaceDotWithForward = this.classPathToJavaFile.replace('.', '/');
+        String replaceDotWithForward = this.classPathToJavaFile.replace('.', '/');
 
-			File pomFileExecuted = this.mavenProject.getFile();
-			File directoryOfPomFile = pomFileExecuted.getParentFile();
+        File pomFileExecuted = this.mavenProject.getFile();
+        File directoryOfPomFile = pomFileExecuted.getParentFile();
 
+        StringBuilder returnVal = new StringBuilder();
+        returnVal.append(directoryOfPomFile.getAbsolutePath());
+        returnVal.append("/");
+        returnVal.append(PREFIX);
+        returnVal.append(replaceDotWithForward);
+        returnVal.append(".java");
 
-			StringBuilder returnVal = new StringBuilder();
-			returnVal.append(directoryOfPomFile.getAbsolutePath());
-			returnVal.append("/");
-			returnVal.append(PREFIX);
-			returnVal.append(replaceDotWithForward);
-			returnVal.append(".java");
+        return returnVal.toString();
 
-			return returnVal.toString();
-
-    }
-
-    private static final String SOURCE = "" + "package {{PACKAGE}};\n\n" + "" + "public class {{CLASS_NAME}} {\n\n" + ""
-	    + "public static final String {{GIT_DESCRIBE_CONSTANT_NAME}} = \"\";\n\n" + "" + "}";
-
-    private static final class Token {
-	private static final String CLASS_NAME = "{{CLASS_NAME}}";
-	private static final String PACKAGE = "{{PACKAGE}}";
-	private static final String GIT_DESCRIBE_CONSTANT_NAME = "{{GIT_DESCRIBE_CONSTANT_NAME}}";
     }
 
     /**
-	 *
-	 */
+	 * Creates a default GitDescribe Java source file.
+     *
+     */
     private void createDefaultGitDescribe(File toCreateParam) throws IOException {
 
-	int lastIndexOfDot = this.classPathToJavaFile.lastIndexOf('.');
+        int lastIndexOfDot = this.classPathToJavaFile.lastIndexOf('.');
 
-	String className = this.classPathToJavaFile.substring(lastIndexOfDot + 1);
-	String packageOnly = this.classPathToJavaFile.substring(0, lastIndexOfDot);
+        String className = this.classPathToJavaFile.substring(lastIndexOfDot + 1);
+        String packageOnly = this.classPathToJavaFile.substring(0, lastIndexOfDot);
 
-	String modifiedSource = SOURCE.replace(Token.CLASS_NAME, className);
-	modifiedSource = modifiedSource.replace(Token.PACKAGE, packageOnly);
-	modifiedSource = modifiedSource.replace(Token.GIT_DESCRIBE_CONSTANT_NAME, this.constantToChange);
+        String modifiedSource = SOURCE.replace(Token.CLASS_NAME, className);
+        modifiedSource = modifiedSource.replace(Token.PACKAGE, packageOnly);
+        modifiedSource = modifiedSource.replace(Token.GIT_DESCRIBE_CONSTANT_NAME, this.constantToChange);
 
-			this.getLog().info(modifiedSource);
+        this.getLog().info(modifiedSource);
 
-
-	FileUtils.writeStringToFile(toCreateParam, modifiedSource);
+        FileUtils.writeStringToFile(toCreateParam, modifiedSource);
     }
 
     /**
+	 * Executes the {@code git describe} command and returns the result.
      * 
-     * @return
+     * @return Outcome of {@code git describe}.
      */
     private String getGitDescribeValue() throws MojoExecutionException {
-	CommandUtil.CommandResult commandResult = CommandUtil.executeCommand(this.getLog(), "git", "describe");
+        CommandUtil.CommandResult commandResult = CommandUtil.executeCommand(this.getLog(), "git", "describe");
 
-	String[] resultLines = commandResult.getResultLines();
-	if (resultLines == null || resultLines.length == 0) {
-	    return "Unable to get tag version.";
-	}
+        String[] resultLines = commandResult.getResultLines();
+        if (resultLines == null || resultLines.length == 0) {
+            return "Unable to get tag version.";
+        }
 
-	if (commandResult.getExitCode() != 0) {
-	    String specificError = "";
+        if (commandResult.getExitCode() != 0) {
+            String specificError = "";
 
-	    for (String line : resultLines) {
-		specificError += line;
-	    }
+            for (String line : resultLines) {
+                specificError += line;
+            }
 
-	    return ("Not expected response code [" + commandResult.getExitCode() + "]. 'git describe' failed. Tag your repository!!! " + specificError);
-	}
+            return ("Not expected response code [" + commandResult.getExitCode() + "]. 'git describe' failed. Tag your repository!!! " + specificError);
+        }
 
-	this.getLog().info("Execute Result: " + commandResult.getExitCode() + commandResult.getResultLines()[0]);
+        this.getLog().info("Execute Result: " + commandResult.getExitCode() + commandResult.getResultLines()[0]);
 
-	String returnVal = "";
-	for (String line : resultLines) {
-	    returnVal += line;
-	}
+        String returnVal = "";
+        for (String line : resultLines) {
+            returnVal += line;
+        }
 
-	return returnVal;
+        return returnVal;
     }
 }
