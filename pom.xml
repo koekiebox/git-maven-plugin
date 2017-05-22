@@ -72,6 +72,14 @@
         <scope>provided</scope>
       </dependency>
 
+      <!--Maven GPG Plugin-->
+      <dependency>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <scope>provided</scope>
+      </dependency>
+
       <!-- dependencies to annotations -->
       <dependency>
         <groupId>org.apache.maven.plugin-tools</groupId>
@@ -115,4 +123,23 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
   </distributionManagement>
+
+  <build>
+    <plugins>
+      <!--Maven GPG Sign Plugin-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
