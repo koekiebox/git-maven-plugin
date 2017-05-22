@@ -31,7 +31,7 @@
     <developer>
       <name>Jason Bruwer</name>
       <email>jason@koekiebox.com</email>
-      <organization>Koekiebox</organization>
+      <organization>Koekiebox (Pty) Ltd</organization>
     </developer>
   </developers>
 
@@ -42,10 +42,27 @@
   <dependencyManagement>
     <dependencies>
 
+      <!--Maven Plugin-->
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-plugin-api</artifactId>
-        <version>3.0.5</version>
+        <version>3.5.0</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!--Maven Source Plugin-->
+      <dependency>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!--Maven Javadoc Plugin-->
+      <dependency>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.4</version>
         <scope>provided</scope>
       </dependency>
 
@@ -53,7 +70,7 @@
       <dependency>
         <groupId>org.apache.maven.plugin-tools</groupId>
         <artifactId>maven-plugin-annotations</artifactId>
-        <version>3.2</version>
+        <version>3.5</version>
         <!--
         annotations are not needed for plugin execution so you can remove this dependency
              for execution with using provided scope.
@@ -64,14 +81,14 @@
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-project</artifactId>
-        <version>2.0.6</version>
+        <version>2.2.1</version>
         <scope>provided</scope>
       </dependency>
 
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.4</version>
+        <version>2.5</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>
