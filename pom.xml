@@ -94,4 +94,19 @@
     </dependencies>
   </dependencyManagement>
 
+  <!--Distribution Management-->
+  <distributionManagement>
+
+    <!--Snapshot-->
+    <snapshotRepository>
+      <id>git_maven_plugin</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+
+    <!--Release-->
+    <repository>
+      <id>git_maven_plugin</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+  </distributionManagement>
 </project>
